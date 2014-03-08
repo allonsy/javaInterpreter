@@ -1,3 +1,4 @@
+import jline.console.ConsoleReader;
 import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
 import edu.rice.cs.plt.text.TextUtil;
 import edu.rice.cs.plt.reflect.ReflectUtil;
@@ -7,6 +8,7 @@ import edu.rice.cs.dynamicjava.interpreter.Interpreter;
 import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
 import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 import edu.rice.cs.drjava.model.repl.InteractionsPaneOptions;
+import java.io.IOException;
 public class JSH
 {
     ClassPathManager _classPathManager;
@@ -39,8 +41,9 @@ public class JSH
       System.out.println("Error");
     }
   }
-  public void interMethod(String in, EasyReader console)
+  public void interMethod(String in, ConsoleReader console) throws IOException
   {
+      console.setPrompt("");
       int braceCount=0;
       boolean quote=false;
       for(int i=0; i<in.length(); i++)
@@ -65,7 +68,7 @@ public class JSH
       if(braceCount==0)
       {
         _interpret(in);
-        System.out.print("> ");
+        console.setPrompt(">");
       }
       else
       {
@@ -90,10 +93,11 @@ public class JSH
       }
       fileFlag=false;
   }
-  public static void main(String[] args)
+  public static void main(String[] args) throws IOException
   {
       JSH inter=new JSH();
-      EasyReader console=new EasyReader();
+      ConsoleReader console=new ConsoleReader();
+      console.setPrompt("> ");
       System.out.println("Welcome to the command line java interpreter!");
       System.out.println("Please call System.exit(0), or CTRL-D to quit");
       if(args.length>0)
@@ -101,9 +105,8 @@ public class JSH
           inter.parseFile(args);
       }
       String input;
-      System.out.print("> ");
       input=console.readLine();
-      while(!console.eof())
+      while(input!=null)
       {
         if(input.contains("{"))
         {
@@ -113,7 +116,6 @@ public class JSH
         else
         {
             inter._interpret(input);
-            System.out.print("> ");
             input=console.readLine();
         }
       }

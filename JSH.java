@@ -86,7 +86,7 @@ public class JSH
               f=f+"\n"+reader.readLine();
           }
           _interpret(f);
-          System.out.println("Succesfully import file: "+args[i]);
+          System.out.println("Succesfully imported file: "+args[i]);
       }
       fileFlag=false;
   }

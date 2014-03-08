@@ -1,2 +1,2 @@
 #!/bin/bash
-java -classpath ".:drjava.jar" JSH $@
+java -cp ".:/home/alecsnyder/Documents/Java/javaInterpreter:/home/alecsnyder/Documents/Java/javaInterpreter/drjava.jar" JSH $@

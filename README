@@ -1,0 +1,14 @@
+author: Alec Snyder
+
+DrJava is a copyright of Rice University
+
+e-mail me with any questions: linuxbash8@gmail.com
+
+Directions: Move the drjava.jar, JSH.java, jsh script and EasyReader.class into a directory of your choice
+
+Then, run:
+$javac -classpath ".:drjava.jar" JSH.java  assuming you are running this from the directory with all the files
+
+then, run ./jsh and enjoy. 
+If you have files that you want to preload, i.e SomeClass.java, run $./jsh SomeClass.java SomeOtherClass.java
+for each class you want to preload.

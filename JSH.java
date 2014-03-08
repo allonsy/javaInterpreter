@@ -68,7 +68,7 @@ public class JSH
       if(braceCount==0)
       {
         _interpret(in);
-        console.setPrompt(">");
+        console.setPrompt("> ");
       }
       else
       {

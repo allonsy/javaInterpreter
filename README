@@ -9,9 +9,12 @@ Directions: Move the drjava.jar, jline-2.11.jar,JSH.java, jsh script and EasyRea
 Then, run:
 $javac -classpath ".:drjava.jar:jline-2.11.jar" JSH.java  assuming you are running this from the directory with all the files
 
-modify the .jsh executable to correctly show you directory structure.
+modify the .jsh executable to correctly show you directory structure. Go ahead and follow my model.
 then, run ./jsh and enjoy. 
 If this doesn't work, then manually run:
 $java -classpath ".:drjava.jar:jline-2.11.jar" JSH
-If you have files that you want to preload, i.e SomeClass.java, run $./jsh SomeClass.java SomeOtherClass.java
+If you have files that you want to preload, i.e SomeClass.java, run $ jsh SomeClass.java SomeOtherClass.java
 for each class you want to preload.
+The program automatically inherits all the current classpath, including the current directory that you are in.
+This means that any .class files in your classpath will be fully accessible within the shell
+

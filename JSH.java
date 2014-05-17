@@ -9,6 +9,7 @@ import edu.rice.cs.dynamicjava.interpreter.InterpreterException;
 import edu.rice.cs.dynamicjava.interpreter.EvaluatorException;
 import edu.rice.cs.drjava.model.repl.InteractionsPaneOptions;
 import java.io.IOException;
+import edu.rice.cs.drjava.model.repl.InteractionsModel;
 public class JSH
 {
     ClassPathManager _classPathManager;
@@ -22,12 +23,16 @@ public class JSH
         _interpreter=new Interpreter(_interpreterOptions, _classPathManager.makeClassLoader(null));
         fileFlag=false;
     }
-	public void _interpret(String toEval) {
-	try {
+	public void _interpret(String toEval, ConsoleReader console) 
+    {
+	try 
+    {
       Option<Object> result = this._interpreter.interpret(toEval);
-      if (result.isSome()) {
+      if (result.isSome()) 
+      {
         String objString = null;
-        try { 
+        try 
+        { 
                 objString = TextUtil.toString(result.unwrap());
                 if(!fileFlag)
                 {
@@ -37,15 +42,36 @@ public class JSH
         catch (Throwable t) { throw new EvaluatorException(t); }
       }
     }
-    catch (InterpreterException e) {
-      System.out.println("Error");
+    catch(koala.dynamicjava.parser.wrapper.ParseError e)
+    {
+        System.out.println("HI");
+    }
+    catch (InterpreterException e) 
+    {
+      
+      if(e.getMessage().equals("koala.dynamicjava.parser.wrapper.ParseError: Encountered Unexpected \"<EOF>\""))
+      {
+          try
+          {
+              //System.out.println("sent to inter");
+            interMethod(toEval, console);
+          }
+          catch(IOException ex)
+          {
+              System.out.println(e.getMessage());
+          }
+      }
+      else
+      {
+          System.out.println(e.getMessage());
+      }
     }
   }
   public void interMethod(String in, ConsoleReader console) throws IOException
   {
-      console.setPrompt("");
+      console.setPrompt("... ");
       int braceCount=0;
-      boolean quote=false;
+      boolean quote=false, flag=false;
       for(int i=0; i<in.length(); i++)
       {
           if(in.charAt(i)=='"' && i==0)
@@ -59,15 +85,16 @@ public class JSH
           else if(in.charAt(i)=='{' && !quote)
           {
               braceCount++;
+              flag=true;
           }
           else if(in.charAt(i)=='}' && !quote)
           {
               braceCount--;
           }
       }
-      if(braceCount==0)
+      if(braceCount==0&&flag)
       {
-        _interpret(in);
+        _interpret(in, console);
         console.setPrompt("> ");
       }
       else
@@ -76,7 +103,7 @@ public class JSH
           interMethod(in, console);
       }
   }
-  public void parseFile(String [] args)
+  public void parseFile(String [] args, ConsoleReader console)
   {
       fileFlag=true;
       for(int i=0; i<args.length; i++)
@@ -88,10 +115,13 @@ public class JSH
           {
               f=f+"\n"+reader.readLine();
           }
-          _interpret(f);
+          _interpret(f, console);
           System.out.println("Succesfully imported file: "+args[i]);
       }
       fileFlag=false;
+  }
+  public void _notifyInteractionIncomplete() {
+    System.out.println("Hello World");
   }
   public static void main(String[] args) throws IOException
   {
@@ -102,7 +132,7 @@ public class JSH
       System.out.println("Please call System.exit(0), or CTRL-D to quit");
       if(args.length>0)
       {
-          inter.parseFile(args);
+          inter.parseFile(args, console);
       }
       String input;
       input=console.readLine();
@@ -115,7 +145,7 @@ public class JSH
         }
         else
         {
-            inter._interpret(input);
+            inter._interpret(input, console);
             input=console.readLine();
         }
       }

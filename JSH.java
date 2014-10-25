@@ -53,7 +53,7 @@ public class JSH
       {
           try
           {
-              //System.out.println("sent to inter");
+            //System.out.println("sent to inter");
             interMethod(toEval, console);
           }
           catch(IOException ex)
@@ -66,6 +66,18 @@ public class JSH
           System.out.println(e.getMessage());
       }
     }
+  }
+  private boolean containsOneLine(String s)
+  {
+	  int count=0;
+	  for(int i=0; i<s.length(); i++)
+	  {
+		  if(s.charAt(i)=='\n')
+		  count++;
+	  }
+	  if(count==1)
+		  return true;
+	  return false;
   }
   public void interMethod(String in, ConsoleReader console) throws IOException
   {
@@ -97,6 +109,12 @@ public class JSH
         _interpret(in, console);
         console.setPrompt("> ");
       }
+	  else if((!(flag)) && containsOneLine(in))
+	  {
+		  //System.out.println("enter the fist");
+		  _interpret(in,console);
+		  console.setPrompt("> ");
+	  }
       else
       {
           in=in+"\n"+console.readLine();

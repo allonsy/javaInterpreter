@@ -1,4 +1,3 @@
-import jline.console.ConsoleReader;
 import edu.rice.cs.drjava.model.repl.newjvm.ClassPathManager;
 import edu.rice.cs.plt.text.TextUtil;
 import edu.rice.cs.plt.reflect.ReflectUtil;
@@ -16,14 +15,28 @@ public class JSH
     InteractionsPaneOptions _interpreterOptions;
     Interpreter _interpreter;
     boolean fileFlag;
+    public long pointer;
+    public String prompt;
+    public byte single;
+    
+     static //JNI
+    {
+        System.loadLibrary("Readline");
+    }
+    public native String readLine(String prompt, int flag);
+    
+    
     public JSH()
     {
         _classPathManager=new ClassPathManager(ReflectUtil.SYSTEM_CLASS_PATH);
         _interpreterOptions=new InteractionsPaneOptions();
         _interpreter=new Interpreter(_interpreterOptions, _classPathManager.makeClassLoader(null));
         fileFlag=false;
+        pointer=0;
+        prompt=">>> ";
+        single=1;
     }
-	public void _interpret(String toEval, ConsoleReader console) 
+	public void _interpret(String toEval) 
     {
 	try 
     {
@@ -53,8 +66,7 @@ public class JSH
       {
           try
           {
-            //System.out.println("sent to inter");
-            interMethod(toEval, console);
+            interMethod(toEval);
           }
           catch(IOException ex)
           {
@@ -79,9 +91,9 @@ public class JSH
 		  return true;
 	  return false;
   }
-  public void interMethod(String in, ConsoleReader console) throws IOException
+  public void interMethod(String in) throws IOException
   {
-      console.setPrompt("... ");
+      prompt="... ";
       int braceCount=0;
       boolean quote=false, flag=false;
       for(int i=0; i<in.length(); i++)
@@ -106,22 +118,22 @@ public class JSH
       }
       if(braceCount==0&&flag)
       {
-        _interpret(in, console);
-        console.setPrompt("> ");
+        _interpret(in);
+        prompt="> ";
       }
 	  else if((!(flag)) && containsOneLine(in))
 	  {
 		  //System.out.println("enter the fist");
-		  _interpret(in,console);
-		  console.setPrompt("> ");
+		  _interpret(in);
+		  this.prompt="> ";
 	  }
       else
       {
-          in=in+"\n"+console.readLine();
-          interMethod(in, console);
+          in=in+"\n"+this.readLine(prompt, single);
+          interMethod(in);
       }
   }
-  public void parseFile(String [] args, ConsoleReader console)
+  public void parseFile(String [] args)
   {
       fileFlag=true;
       for(int i=0; i<args.length; i++)
@@ -133,7 +145,7 @@ public class JSH
           {
               f=f+"\n"+reader.readLine();
           }
-          _interpret(f, console);
+          _interpret(f);
           System.out.println("Succesfully imported file: "+args[i]);
       }
       fileFlag=false;
@@ -144,27 +156,27 @@ public class JSH
   public static void main(String[] args) throws IOException
   {
       JSH inter=new JSH();
-      ConsoleReader console=new ConsoleReader();
-      console.setPrompt("> ");
+      inter.prompt="> ";
       System.out.println("Welcome to the command line java interpreter!");
       System.out.println("Please call System.exit(0), or CTRL-D to quit");
       if(args.length>0)
       {
-          inter.parseFile(args, console);
+          inter.parseFile(args);
       }
       String input;
-      input=console.readLine();
+      input=inter.readLine(inter.prompt, inter.single);
+      inter.single=0;
       while(input!=null)
       {
         if(input.contains("{"))
         {
-            inter.interMethod(input, console);
-            input=console.readLine();
+            inter.interMethod(input);
+            input=inter.readLine(inter.prompt, inter.single);
         }
         else
         {
-            inter._interpret(input, console);
-            input=console.readLine();
+            inter._interpret(input);
+            input=inter.readLine(inter.prompt, inter.single);
         }
       }
       System.exit(0);
